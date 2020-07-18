@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Kubernetes-notes : ">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Kubernetes-notes</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/achoudh5/Kubernetes-Notes">View on GitHub</a>
+
+          <h1 id="project_title">Kubernetes-notes</h1>
+          <h2 id="project_tagline"></h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/achoudh5/Kubernetes-Notes/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/achoudh5/Kubernetes-Notes/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h2>
+<a id="definition" class="anchor" href="#definition" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Definition</h2>
+<ul>
+<li>
+<p><strong>Container Orchestration</strong>- is the automatic process of managing or scheduling the work of individual containers for applications based on microservices within multiple clusters.</p>
+</li>
+<li>
+<p><strong>Container orchestration</strong>- automates the deployment, management, scaling, and networking of containers. Enterprises that need to deploy and manage hundreds or thousands of Linux® containers and hosts can benefit from container orchestration. Container orchestration can be used in any environment where you use containers</p>
+</li>
+<li>
+<p><strong>Nodes</strong>- Machine either physical or virtual; Containers are launched on this machine. Earlier known as Minions</p>
+</li>
+<li>
+<p><strong>Cluster</strong>- set of nodes grouped together, if one node fails you can use other one.</p>
+</li>
+<li>
+<p><strong>Master</strong>- Watches over the nodes in cluster</p>
+</li>
+<li>
+<p><strong>Container runtime</strong>- A container runtime is software that executes containers and manages container images on a node. Today, the most widely known container runtime is Docker, but there are other container runtimes in the ecosystem, such as rkt, containerd, and lxd</p>
+</li>
+</ul>
+<h2>
+<a id="what-components-are-installed-when-you-install-kubernetes-on-system" class="anchor" href="#what-components-are-installed-when-you-install-kubernetes-on-system" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>What components are installed when you install Kubernetes on system?</h2>
+<p><strong>API</strong> (act as frontend for kubernetes; exposes a set of capabilities allowing us to define how we want to define our workloads)</p>
+<p><strong>etcd</strong> (distributed key-value store)</p>
+<p><strong>Kubelet</strong> (agent that runs on each node on the cluster; Helps in scheduling &amp; nodes are healthy)</p>
+<p><strong>Container Runtime</strong> (we will use docker in our case but can be rkt, CRI-O etc.)</p>
+<p><strong>Scheduler</strong>( distributing containers)</p>
+<p><strong>Controller</strong> (when nodes or endpoints go down these are used)</p>
+<h2>
+<a id="master-vs-worker-nodes" class="anchor" href="#master-vs-worker-nodes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>MASTER vs WORKER Nodes</h2>
+<p><strong>Worker Node</strong>:- This contains <strong>Container Runtime</strong> , <strong>Kubelet</strong> (agent that talks with master &amp; tells about health of worker node to master node; it also carries out the actions from master onto the worker node) components</p>
+<p><strong>Master Node</strong>:- This contains the <strong>Kube-apiserver</strong> , <strong>etcd</strong> (Key-value), <strong>controller</strong> , <strong>scheduler</strong> components</p>
+<h2>
+<a id="command-line" class="anchor" href="#command-line" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Command Line</h2>
+<h4>
+<a id="kubectl" class="anchor" href="#kubectl" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Kubectl</h4>
+<p><code>kubectl run</code> (this command deploys the application on the cluster)</p>
+<p><code>kubectl cluster-info</code> (info about the cluster)</p>
+<p><code>kubectl get nodes</code> (all nodes part of the cluster)</p>
+<p><code>kubectl get pods</code> (all pods part of the node)</p>
+<p><code>kubectl describe pod &lt;pod_name&gt;</code> (details about the particular pod)</p>
+<p><code>kubectl run &lt;pod_name_you_want_to_keep&gt; --image=&lt;image_name&gt;</code> (Another way to create a pod with the image used)</p>
+<p><code>kubectl edit pod &lt;pod_name&gt;</code> (edit the yml file for that pod)</p>
+<p><code>kubectl create -f pod-definition.yml</code> (creates a new pod using playbook)</p>
+<p><code>kubectl delete deployment &lt;pod name&gt;</code> (deletes the pod deployed)</p>
+<p><code>kubectl delete pod &lt;pod_name&gt;</code> (deletes the pod)</p>
+<p><code>kubectl create -f rc-definition.yml</code> (create RC)</p>
+<p><code>kubectl get replicationcontroller</code> (displays the rc's)</p>
+<p><code>kubectl get pods</code> (if you see anything that has the name rc in it that'll correspond to replication controller)</p>
+<p><code>kubectl create -f replicaset-definition.yml</code> (create RC)</p>
+<p><code>kubectl get replicaset</code> (displays the rc's)</p>
+<p><code>kubectl get pods</code> (if you see anything that has the name replicaset in it that'll correspond to replication controller)</p>
+<p><code>kubectl get deployments</code> (to get all the deployment objects created)</p>
+<p><code>kubectl create -f deployment-definition.yaml</code> (create deployment pods)</p>
+<p><code>kubectl get pods --all-namespaces</code> (to list pods of all namespaces)</p>
+<p><strong>Scaling replicaset(rs) pods</strong></p>
+<ul>
+<li>
+<p>One, Edit the <code>replicaset-definition.yml</code> &amp; change the replicas from 3 to 6</p>
+</li>
+<li>
+<p>Now, run <code>kubectl replace -f replicaset-definition.yml</code></p>
+</li>
+<li>
+<p>Second, <code>kubectl scale --replicas=6 -f replicaset-definition.yml</code></p>
+</li>
+<li>
+<p>Third, <code>kubectl scale rs &lt;replica-set-name&gt; --replicas=5</code></p>
+</li>
+</ul>
+<p><code>kubectl delete replicaset &lt;replicaset_name&gt;</code> (This deletes all underlying PODs)</p>
+<p><code>kubectl get all</code> ( To see all the objects created)</p>
+<p><code>kubectl get pods --namespace=&lt;namespace&gt;</code> (To view all pods within a namespace)</p>
+<p><code>kubectl create -f pod-definition.yml --namespace=&lt;namespace_name&gt;</code> (To create pod with a namespace)</p>
+<p><code>kubectl create -f Compute-quota.yaml</code> (defining resource quota to limit resources used by a namespace)</p>
+<p><code>kubectl create configmap &lt;config-name&gt; --from-literal=&lt;key&gt;=&lt;value&gt;</code></p>
+<p>`kubectl create configmap  --from-file=</p>
+<p><code>kubectl get configmaps</code></p>
+<p><code>kubectl create secret generic &lt;secret-name&gt; --from-literal=&lt;key&gt;=&lt;value&gt;</code></p>
+<p>Now, the below part shouldn't be in a plain text format</p>
+<pre><code>data:
+  DB_Host: mysql
+  DB_User: root
+  DB_Password: password
+</code></pre>
+<p>So, in linux:</p>
+<p>`echo -n 'mysql' | base64</p>
+<p><code>echo -n 'root' | base64</code></p>
+<p><code>echo -n 'password' | base64</code></p>
+<p><strong>The output for all above will be a hashed format, use that in the yaml file instead</strong></p>
+<p><code>kubectl get secrets</code> (shows the attributes but hides the value)</p>
+<p><code>kubectl get secret app-secret -o yaml</code> (shows the attributes &amp; value)</p>
+<p><code>kubectl describe secrets</code></p>
+<p><strong>To decode the hashed values which we made above use the following command:-</strong></p>
+<p><code>echo -n 'hashed value' | base64 --decode</code></p>
+<h6>
+<a id="kubectl-debugging" class="anchor" href="#kubectl-debugging" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Kubectl Debugging</h6>
+<p><code>kubectl describe pod &lt;pod name&gt;</code> (describes everything about that pod, what containers are part of it, when's
+created etc.)</p>
+<p><code>kubectl logs --previous &lt;pod name&gt;</code> (debugging commands)</p>
+<p><code>Kubectl create -f namespace-dev.yml</code> (create namespace)</p>
+<p>or</p>
+<p><code>kubectl create namespace &lt;namespace_name&gt;</code></p>
+<p>Now, if you want to make a particular namespace as default apart from the actual default namespace:-</p>
+<p><strong>Example, we want to make dev ns as default now</strong></p>
+<p><code>kubectl config set-context $(kubectl config current-context) --namespace=dev</code></p>
+<p>Now, if we do <code>kubectl get pods</code> we get the pods of the dev namespace. To list the namespace of other</p>
+<p>namespaces such as default we do <code>kubectl get pods --namespace=default</code></p>
+<p><strong>If the replica-set pod is giving ImagePullError</strong></p>
+<p>There are two options:-</p>
+<ul>
+<li>
+<p>First, you can delete all the replica set pods. The re-spawned pod will run fine</p>
+</li>
+<li>
+<p>Second, you can copy the yaml file that is being used to create the replicaset.</p>
+<p><code>kubectl get rs &lt;replica-set-name&gt; -o yaml &gt; &lt;any-name.yaml&gt;</code></p>
+<p>Now, delete the original replica set yaml file you just copied.</p>
+<p><code>kubectl delete rs &lt;replica-set-name&gt;</code></p>
+<p>Now, you still have the replica-set yaml file but it uses the correct image.</p>
+</li>
+</ul>
+<p>Kubernetes **doesn't deploy **container directly on worker nodes, the container are encapsulated into kubernetes object called <strong>pods</strong>.</p>
+<p>Pod is the smallest object that you can create in kubernetes.</p>
+<p>If you need to scale your instance when the userbase increase then, rather than adding a new pod to the same pod, we create a new instance aka pod with same application or container.</p>
+<p><strong>A single pod can have multiple application which are different but if we want to have the same application installed on the pod then, we usually have a separate pod with same instance inside the cluster</strong>.</p>
+<p><strong>Pods</strong> take care of the namespaces ex. volume, storage, network etc. We just need to tell which container belong to the particular <strong>pod</strong> &amp; any action taken on a pod can be applied only to those containers inside that particular pod only.</p>
+<blockquote>
+<p>Cluster--&gt;Pods--&gt;Container (Docker applications)</p>
+</blockquote>
+<h1>
+<a id="yaml" class="anchor" href="#yaml" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>YAML</h1>
+<ul>
+<li>Kubernetes uses <strong>YAML</strong> to define the resources that are sent to the API server which end up creating the actual application</li>
+</ul>
+<h2>
+<a id="creating-pod-using-yaml" class="anchor" href="#creating-pod-using-yaml" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Creating POD using YAML</h2>
+<p>pod-definition.yml</p>
+<p><strong>(All fields below are required:-)</strong></p>
+<pre><code>apiVersion: v1(string value)
+
+kind: Pod(string value) 
+
+metadata: (Dictionary)
+
+   name: myapp-pod(string value)---&gt; only values kubernetes expects`
+
+   labels: (dictionary)--&gt; any values can be underneath this`
+
+       app: myapp(string value)
+
+       type: front-end(style value)
+
+spec: 
+
+   containers: (List/Array)--&gt;since,pod can have multiple containers
+
+     - name: nginx-container
+
+       image: nginx
+</code></pre>
+<blockquote>
+<p>kubectl(uses yaml playbook)--&gt; API (K8s master node)--&gt;application deployed to worker nodes</p>
+</blockquote>
+<p>Ready(under kubectl get pods)-&gt; running containers in pod &amp; total containers in pod</p>
+<h1>
+<a id="kubernetes-controllers-brain-behind-kubernetes" class="anchor" href="#kubernetes-controllers-brain-behind-kubernetes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Kubernetes Controllers (Brain behind Kubernetes)</h1>
+<p>One of the controller is <strong>Replication controller</strong></p>
+<p>-&gt; It provides HA by creating pods whenever there is a situation where the pod crashes. It not only provides the re-spawning of the pod capability where it has two pods, it can also do the same thing when there is one pod too.</p>
+<p>-&gt; <strong>Replica Set</strong> is the new technology replacing <strong>Replica Controller</strong></p>
+<h2>
+<a id="creating-rcreplication-controller-using-yaml" class="anchor" href="#creating-rcreplication-controller-using-yaml" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Creating RC(replication Controller) using YAML</h2>
+<p>rc-definition.yml</p>
+<p><strong>(All fields below are required:-)</strong></p>
+<pre><code>apiVersion: v1(string value)
+
+kind: ReplicationController(string value) 
+
+metadata: (Dictionary)
+
+   name: myapp-rc(string value)---&gt; only values kubernetes expects`
+
+   labels: (dictionary)--&gt; any values can be underneath this`
+
+       app: myapp(string value)
+
+       type: front-end(style value)
+
+spec:
+ template:
+(the part below is taken from pod-definition.yml exactly. *Check above* )
+  metadata: (Dictionary)
+
+   name: myapp-pod(string value)---&gt; only values kubernetes expects`
+
+   labels: (dictionary)--&gt; any values can be underneath this`
+
+       app: myapp(string value)
+
+       type: front-end(style value)
+
+  spec: 
+
+   containers: (List/Array)--&gt;since,pod can have multiple containers
+
+     - name: nginx-container
+
+       image: nginx
+ replicas: 3(template &amp; replicas are direct child of rc spec)
+
+   
+</code></pre>
+<p><code>kubectl create -f rc-definition.yml</code> (create RC)</p>
+<p><code>kubectl get replicationcontroller</code> (displays the rc's)</p>
+<p><code>kubectl get pods</code> (if you see anything that has the name rc in it that'll correspond to replication controller)</p>
+<h2>
+<a id="creating-replicaset-using-yaml" class="anchor" href="#creating-replicaset-using-yaml" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Creating replicaset using YAML</h2>
+<p>replicaset-definition.yml</p>
+<p><strong>(All fields below are required:-)</strong></p>
+<pre><code>apiVersion: *apps/v1*(string value)
+
+kind: ReplicaSet(string value) 
+
+metadata: (Dictionary)
+
+   name: myapp-replicaset(string value)---&gt; only values kubernetes expects`
+
+   labels: (dictionary)--&gt; any values can be underneath this`
+
+       app: myapp(string value)
+
+       type: front-end(style value)
+
+spec:
+ template:
+(the part below is taken from pod-definition.yml exactly. *Check above*)
+  metadata: (Dictionary)
+
+   name: myapp-pod(string value)---&gt; only values kubernetes expects`
+
+   labels: (dictionary)--&gt; any values can be underneath this`
+
+       app: myapp(string value)
+
+       type: front-end(style value)
+
+  spec: 
+
+   containers: (List/Array)--&gt;since, pod can have multiple containers
+
+     - name: nginx-container
+
+       image: nginx
+ replicas: 3(template &amp; replicas are direct child of rc spec)
+ *selector*: (additional to rc, this helps replicaset to determine what pods fall under replicaset because it can also manage pods that were not created as part of replicaset apart from the ones it is creating above in this yml file)
+    matchlabels:
+      type: front-set
+
+   
+</code></pre>
+<p><code>kubectl create -f replicaset-definition.yml</code> (create RC)</p>
+<p><code>kubectl get replicaset</code> (displays the rc's)</p>
+<p><code>kubectl get pods</code> (if you see anything that has the name replicaset in it that'll correspond to replication controller)</p>
+<h1>
+<a id="labels--selectors" class="anchor" href="#labels--selectors" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>LABELS &amp; SELECTORS</h1>
+<ul>
+<li>
+<p>Replicaset deploy new pods if there is a damaged one</p>
+</li>
+<li>
+<p>Replicaset is a process that monitors our existing pods</p>
+</li>
+</ul>
+<h3>
+<a id="how-does-replicaset-know-which-pods-to-monitor" class="anchor" href="#how-does-replicaset-know-which-pods-to-monitor" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How does replicaset know which pods to monitor?</h3>
+<ul>
+<li>
+<p>Labels helps replicaset here</p>
+</li>
+<li>
+<p>In <strong>replicaset-definition.yml</strong> under selector, we use the matchLabels to match the labels we use while creating the pods in <strong>pod-definition.yml</strong></p>
+</li>
+</ul>
+<h3>
+<a id="do-we-need-template-section-in-replicaset-definitionyml-eventhough-the-pods-are-already-defined-in-pod-definitionyml" class="anchor" href="#do-we-need-template-section-in-replicaset-definitionyml-eventhough-the-pods-are-already-defined-in-pod-definitionyml" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Do we need <code>template</code> section in <code>replicaset-definition.yml</code> eventhough the pods are already defined in <code>pod-definition.yml</code>?</h3>
+<ul>
+<li>Yes, we do need it in replicaset because at some point if one of the pods go down, replicaset will help re-spawn the pod. So, the definition of the pod is required in the template section of the replciaset.</li>
+</ul>
+<h1>
+<a id="scale" class="anchor" href="#scale" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Scale</h1>
+<p><strong>If now we need to increase the number of replicas to be 6 rather than 3</strong></p>
+<p>Two ways:-</p>
+<ul>
+<li>
+<p>One, Edit the <code>replicaset-definition.yml</code> &amp; change the replicas from 3 to 6</p>
+</li>
+<li>
+<p>Now, run <code>kubectl replace -f replicaset-definition.yml</code></p>
+</li>
+<li>
+<p>Second, <code>kubectl scale --replicas=6 -f replicaset-definition.yml</code></p>
+</li>
+</ul>
+<h1>
+<a id="formatting-output-with-kubectl" class="anchor" href="#formatting-output-with-kubectl" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Formatting Output with Kubectl</h1>
+<p>The -o flag allows us to output the details in several different formats.</p>
+<p><strong>kubectl [command] [TYPE] [NAME] -o &lt;output_format&gt;</strong></p>
+<p>Here are some of the commonly used formats:</p>
+<ul>
+<li>
+<p><code>-o json</code> Output a JSON formatted API object.</p>
+</li>
+<li>
+<p><code>-o name</code> Print only the resource name and nothing else.</p>
+</li>
+<li>
+<p><code>-o wide</code> Output in the plain-text format with any additional information.</p>
+</li>
+<li>
+<p><code>-o yaml</code> Output a YAML formatted API object.</p>
+</li>
+</ul>
+<p>Here are some useful examples:</p>
+<ul>
+<li>Output with JSON format:</li>
+</ul>
+<pre><code>master $ kubectl create namespace test-123 --dry-run -o json
+{
+    "kind": "Namespace",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "test-123",
+        "creationTimestamp": null
+    },
+    "spec": {},
+    "status": {}
+}
+master $
+</code></pre>
+<ul>
+<li>Output with YAML format:</li>
+</ul>
+<pre><code>master $ kubectl create namespace test-123 --dry-run -o yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  name: test-123
+spec: {}
+status: {}
+</code></pre>
+<ul>
+<li>Output with wide (additional details):</li>
+</ul>
+<pre><code>master $ kubectl get pods -o wide
+NAME      READY   STATUS    RESTARTS   AGE     IP          NODE     NOMINATED NODE   READINESS GATES
+busybox   1/1     Running   0          3m39s   10.36.0.2   node01   &lt;none&gt;           &lt;none&gt;
+ningx     1/1     Running   0          7m32s   10.44.0.1   node03   &lt;none&gt;           &lt;none&gt;
+redis     1/1     Running   0          3m59s   10.36.0.1   node01   &lt;none&gt;           &lt;none&gt;
+master $
+</code></pre>
+<h1>
+<a id="namespace" class="anchor" href="#namespace" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Namespace</h1>
+<ul>
+<li>Resources within a ns can call each other with their name but to call a service from another ns</li>
+</ul>
+<p><strong>DNS</strong></p>
+<p><code>&lt;service&gt;.&lt;namespace_to_call_service_from&gt;.(service)svc.(domain)cluster.local</code></p>
+<h4>
+<a id="to-view-all-pods-within-a-namespace" class="anchor" href="#to-view-all-pods-within-a-namespace" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>To view all pods within a namespace</h4>
+<p><code>kubectl get pods --namespace=&lt;namespace&gt;</code></p>
+<p><strong>kubectl get pods</strong> uses namespace as <strong>default</strong> by default</p>
+<h4>
+<a id="to-create-pod-with-a-namespace" class="anchor" href="#to-create-pod-with-a-namespace" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>To create pod with a namespace</h4>
+<p><code>kubectl create -f pod-definition.yml --namespace=&lt;namespace_name&gt;</code></p>
+<h4>
+<a id="how-to-create-a-namespace" class="anchor" href="#how-to-create-a-namespace" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How to create a namespace?</h4>
+<p>namespace-dev.yml</p>
+<pre><code>apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev
+</code></pre>
+<p><code>Kubectl create -f namespace-dev.yml</code></p>
+<p>or</p>
+<p><code>kubectl create namespace &lt;namespace_name&gt;</code></p>
+<p>Now, if you want to make a particular namespace as default apart from the actual default namespace:-</p>
+<p><strong>Example, we want to make dev ns as default now</strong></p>
+<p><code>kubectl config set-context $(kubectl config current-context) --namespace=dev</code></p>
+<p>Now, if we do <code>kubectl get pods</code> we get the pods of the dev namespace. To list the namespace of other namespaces such as default we do <code>kubectl get pods --namespace=default</code></p>
+<p><code>kubectl get pods --all-namespaces</code> (to list pods of all namespaces)</p>
+<h1>
+<a id="resource-quota" class="anchor" href="#resource-quota" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Resource Quota</h1>
+<p>To limit resources in ns create a resource quota</p>
+<p>Compute-quota.yaml</p>
+<pre><code>apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-quota
+  namespace: dev
+spec: 
+  hard:
+    pods: "10"
+    requests.cpu: "4"
+    requests.memory: 5Gi
+    limits.cpu: "10"
+    limits.memory: 10Gi
+</code></pre>
+<p><code>kubectl create -f Compute-quota.yaml</code></p>
+<h1>
+<a id="configuration" class="anchor" href="#configuration" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Configuration</h1>
+<ul>
+<li>
+<p><strong>Entrypoint</strong> in ubuntu corresponds to <strong>Command</strong> in definition.yml file</p>
+</li>
+<li>
+<p><strong>CMD</strong> in ubuntu corresponds to <strong>args</strong> in definition.yml file</p>
+</li>
+</ul>
+<h1>
+<a id="env-variables-in-kubernetes" class="anchor" href="#env-variables-in-kubernetes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Env Variables in Kubernetes</h1>
+<p>In our earlier <strong>pod-definition.yaml</strong>, we add <strong>env</strong> property</p>
+<pre><code>apiVersion: v1(string value)
+
+kind: Pod(string value) 
+
+metadata: (Dictionary)
+
+   name: myapp-pod(string value)---&gt; only values kubernetes expects`
+
+   labels: (dictionary)--&gt; any values can be underneath this`
+
+       app: myapp(string value)
+
+       type: front-end(style value)
+
+spec: 
+
+   containers: (List/Array)--&gt;since,pod can have multiple containers
+
+     - name: nginx-container
+
+       image: nginx
+
+       env:
+         - name: APP_COLOR
+           value: pink
+</code></pre>
+<p>OR</p>
+<p><code>docker run -e APP_COLOR=pink simple-webapp-color</code></p>
+<h5>
+<a id="env-value-types" class="anchor" href="#env-value-types" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Env Value Types</h5>
+<ul>
+<li><strong>Plain Key Value</strong></li>
+</ul>
+<pre><code>env:
+
+  - name: APP_COLOR
+    value: pink
+</code></pre>
+<ul>
+<li><strong>ConfigMap</strong></li>
+</ul>
+<pre><code>env:
+  - name: APP_COLOR
+    valueFrom:
+        configMapKeyRef:
+</code></pre>
+<ul>
+<li><strong>Secrets</strong></li>
+</ul>
+<pre><code>env:
+  - name: APP_COLOR
+    valueFrom:
+        secretKeyRef:
+</code></pre>
+<h5>
+<a id="configmap" class="anchor" href="#configmap" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>ConfigMap</h5>
+<p>2 phases:-</p>
+<ul>
+<li>Create ConfigMap</li>
+<li>Inject into pod</li>
+</ul>
+<p><strong>Create ConfigMap</strong></p>
+<ol>
+<li>Imperative way</li>
+<li>Declarative way</li>
+</ol>
+<p>Imperative way:-</p>
+<p><code>kubectl create configmap &lt;config-name&gt; --from-literal=&lt;key&gt;=&lt;value&gt;</code></p>
+<p>Ex. <code>kubectl create configmap app-config --from-literal=APP_COLOR=pink</code></p>
+<p>when you have too many configuration items use path to file-&gt;</p>
+<p>`kubectl create configmap  --from-file=</p>
+<p>Ex. <code>kubectl create configmap app-config --from-file=app_config.properties</code></p>
+<p>Declarative way:-</p>
+<p><code>kubectl create -f config-map.yaml</code></p>
+<p>config-map.yaml</p>
+<pre><code>apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  APP_COLOR: blue
+  APP_MODE: prod
+</code></pre>
+<h4>
+<a id="view-configmaps" class="anchor" href="#view-configmaps" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>View ConfigMaps</h4>
+<p><code>kubectl get configmaps</code></p>
+<p><code>kubectl describe configmaps</code></p>
+<h4>
+<a id="configmap-in-pods" class="anchor" href="#configmap-in-pods" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>ConfigMap in Pods</h4>
+<p>pod-definition.yaml</p>
+<pre><code>apiVersion: v1
+kind: Pod
+metadata: 
+  name: simple-webapp-color
+  labels:
+    name: simple-webapp-color
+spec:
+  containers:
+  - name: simple-webapp-color
+    image: simple-webapp-color
+    ports:
+      - containerPort: 8080
+    envFrom:
+      - configMapRef:
+           name: app-config
+      
+</code></pre>
+<p>the name: app-config <strong>refers</strong> to</p>
+<p>config-map.yaml</p>
+<pre><code>apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  APP_COLOR: blue
+  APP_MODE: prod
+</code></pre>
+<p>Here, you referred the config map definition through the pod definition.</p>
+<p><strong>ENV</strong></p>
+<pre><code>envFrom:
+  - configMapRef:
+      name: app-config
+</code></pre>
+<p><strong>Single Env</strong></p>
+<pre><code>env:
+  - name: APP_COLOR
+    valueFrom:
+       configMapKeyRef:
+          name: app-config
+          key: APP_COLOR
+</code></pre>
+<p><strong>VOLUME</strong></p>
+<pre><code>volumes:
+- name: app-config-colume
+  configMap:
+    name: app-config
+</code></pre>
+<h5>
+<a id="secrets" class="anchor" href="#secrets" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Secrets</h5>
+<p>Two Steps:</p>
+<ul>
+<li>Create Secret</li>
+<li>Inject into pod</li>
+</ul>
+<h4>
+<a id="create-secret---1-imperativewithout-generating-a-secret-file-2-declarative-using-a-config-file" class="anchor" href="#create-secret---1-imperativewithout-generating-a-secret-file-2-declarative-using-a-config-file" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Create secret -&gt; 1. Imperative(without generating a secret file) 2. Declarative (using a config file)</h4>
+<ol>
+<li>Imperative</li>
+</ol>
+<p><code>kubectl create secret generic &lt;secret-name&gt; --from-literal=&lt;key&gt;=&lt;value&gt;</code></p>
+<p>Ex. <code>kubectl create secret generic app-secret --from-literal=DB_Host=mysql</code></p>
+<p>when you have too many configuration items use path to file-&gt;</p>
+<p>`kubectl create secret generic app-secret  --from-file=</p>
+<p>Ex. <code>kubectl create secret generic app-secret --from-file=app_config.properties</code></p>
+<ol start="2">
+<li>Declarative</li>
+</ol>
+<p><code>kubectl create -f secret-daya.yaml</code></p>
+<p>secret-data.yaml</p>
+<pre><code>apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secret
+data:
+  DB_Host: mysql
+  DB_User: root
+  DB_Password: password
+</code></pre>
+<p>Now, the below part shouldn't be in a plain text format</p>
+<pre><code>data:
+  DB_Host: mysql
+  DB_User: root
+  DB_Password: password
+</code></pre>
+<p>So, in linux:</p>
+<p>`echo -n 'mysql' | base64</p>
+<p><code>echo -n 'root' | base64</code></p>
+<p><code>echo -n 'password' | base64</code></p>
+<p><strong>The output for all above will be a hashed format, use that in the yaml file instead</strong></p>
+<p><code>kubectl get secrets</code> (shows the attributes but hides the value)</p>
+<p><code>kubectl get secret app-secret -o yaml</code> (shows the attributes &amp; value)</p>
+<p><code>kubectl describe secrets</code></p>
+<p><strong>To decode the hashed values which we made above use the following command:-</strong></p>
+<p><code>echo -n 'hashed value' | base64 --decode</code></p>
+<h4>
+<a id="secret-in-pods" class="anchor" href="#secret-in-pods" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Secret in Pods</h4>
+<p>pod-definition.yaml</p>
+<pre><code>apiVersion: v1
+kind: Pod
+metadata: 
+  name: simple-webapp-color
+  labels:
+    name: simple-webapp-color
+spec:
+  containers:
+  - name: simple-webapp-color
+    image: simple-webapp-color
+    ports:
+      - containerPort: 8080
+    envFrom:
+      - secretRef:
+           name: app-secret
+      
+</code></pre>
+<p>the name: app-secret <strong>refers</strong> to</p>
+<p>secret-data.yaml</p>
+<pre><code>apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secret
+data:
+  DB_Host: hashed value(mysql)
+  DB_User: hashed value(root)
+  DB_Password: hashed value(password)
+</code></pre>
+<p>Here, you referred the secret-data definition through the pod definition.</p>
+<p><strong>ENV</strong></p>
+<pre><code>envFrom:
+  - secretRef:
+      name: app-config
+</code></pre>
+<p><strong>Single Env</strong></p>
+<pre><code>env:
+  - name: DB_Password
+    valueFrom:
+       secretKeyRef:
+          name: app-secret
+          key: DB_Password
+</code></pre>
+<p><strong>VOLUME</strong></p>
+<pre><code>volumes:
+- name: app-secret-volume
+  secret:
+    name: app-secret
+</code></pre>
+<p>If I use volumes as one of my method then to retrieve the actual value I have to visit:-</p>
+<p><code>ls /opt/app-secret-volumes</code></p>
+<p><code>cat /opt/app-secret-volumes/DB_Host</code></p>
+<p><code>cat /opt/app-secret-volumes/DB_User</code></p>
+<p><code>cat /opt/app-secret-volumes/DB_Password</code></p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Kubernetes-notes maintained by <a href="https://github.com/achoudh5">achoudh5</a></p>
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
